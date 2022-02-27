@@ -10,6 +10,9 @@ print(cred)
 tool = WinOSClient(host=hostname, username=username, password=password, logger_enabled=True)
 response = tool.run_ps(command='whoami')
 
+
+#print(tool.copy_local(source='./local_file.txt',destination='D:\DevOps\Deployments\\tests'))
+
 #print(response)  
 # ResponseParser(response=(0, 'Major  Minor  Build  Revision\r\n-----  -----  -----  --------\r\n5      1      17763  592', None, '$PSVersionTable.PSVersion'))
 #print(response.exited)  # 0
