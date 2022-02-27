@@ -1,2 +1,3 @@
 ifn*.py
 ifn*.txt
+__pycache__/
