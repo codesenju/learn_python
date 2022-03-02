@@ -7,7 +7,7 @@ import time
 
 def execRemoteCommand(command):   
     stdin, stdout, stderr = ssh.exec_command(command)  
-    output = stdout.readlines() 
+    output = stderr.readlines() 
     for index, item in enumerate(output):
         print(item)
     output = stdout.readlines() 
