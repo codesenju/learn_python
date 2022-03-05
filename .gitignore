@@ -1,3 +1,4 @@
 ifn*.py
 ifn*.txt
 __pycache__/
+.idea/
