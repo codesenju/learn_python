@@ -15,5 +15,5 @@ def get_arguments():
 
 # os.chdir('.')  # change to directory locally
 print('Working Directory: ' + os.getcwd())
-os.system('powershell.exe Compress-Archive -Path ./* -destinationPath Access.zip')
+os.system('powershell.exe Compress-Archive -Path ./* -destinationPath Site.zip')
 time.sleep(2)
