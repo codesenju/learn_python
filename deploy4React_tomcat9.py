@@ -36,7 +36,7 @@ def get_arguments():
 
 def establish_connection(host, user, passwd):
     try:
-        ssh.connect(hostname=host, username=user, password=passwd, )
+        ssh.connect(hostname=host, username=user, password=passwd)
     except Exception as err:
         print("Unable to connect to host: {}".format(err))
         sys.exit(1)

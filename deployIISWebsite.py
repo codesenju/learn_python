@@ -2,13 +2,37 @@ import paramiko
 import sys
 import datetime
 import time
+import os
 
-cred = ''
+ssh = ''
 hostname = ''
 username = ''
 password = ''
 command = ''
-ssh = ''
+env = 'dev'
+site = 'WEB01'
+
+
+def applyWebConfig(env_):
+    global command
+    if env_ == 'qa':
+        print('Apply qa web config')
+        command = 'powershell.exe Copy-Item ' + basePath + 'web_qa.config -Destination ' + basePath + 'web.config'
+        print(command)
+        execRemoteCommand(command)
+
+    elif env_ == 'prod':
+        print('Apply prod web config')
+        command = 'powershell.exe Copy-Item ' + basePath + 'web_prod.config -Destination ' + basePath + 'web.config'
+        print(command)
+        execRemoteCommand(command)
+    elif env_ == 'dev':
+        print('Apply dev web config')
+        command = 'powershell.exe Copy-Item ' + basePath + 'web_dev.config -Destination ' + basePath + 'web.config'
+        print(command)
+        execRemoteCommand(command)
+    else:
+        print('Unable to apply Web config ' + env)
 
 
 def execRemoteCommand(cmd):
@@ -24,17 +48,26 @@ def execRemoteCommand(cmd):
 def get_arguments():
     try:
         # get arguments hostname username password
-        global cred
         cred = [sys.argv[1], sys.argv[2], sys.argv[3]]
         global hostname
         global username
         global password
+        global env
         hostname = cred[0]
         username = cred[1]
         password = cred[2]
+        env = sys.argv[4]
     except Exception as err:
         print("Unable to get arguments: {}".format(err))
         sys.exit(1)
+        if env == 'dev':
+            print("script will apply dev web config {}".format(err))
+        elif env == 'qa':
+            print("script will apply qa web config {}".format(err))
+        elif env == 'prod':
+            print("script will apply prod web config {}".format(err))
+        else:
+            print("Unable to read Web config " + env + " {}".format(err))
 
 
 def establish_connection(host, user, passwd):
@@ -48,47 +81,65 @@ def establish_connection(host, user, passwd):
         sys.exit(1)
 
 
-def automateDeployment():
+def automateDeployment(lines_):
     global command
-    now_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')  # now
-    #   Backup
-    sftp_client = ssh.open_sftp()
-    sftp_client.chdir(rootPath)
-    print('Working Directory: ' + sftp_client.getcwd())
-    sftp_client.put('Site.zip', 'Site.zip')
-    sftp_client.close()
+    for index, item in enumerate(lines_):
+        now_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')  # now
+        print(item)
+        #   Backup
+        sftp_client = ssh.open_sftp()
+        print('\n###############-BACKUP-###############')
+        sftp_client.chdir(backupDir)
+        print('Working Directory: ' + sftp_client.getcwd())
+        print('Local Working Dir: ' + os.getcwd())
+        print(' Original File: ' + basePath + item.strip(
+            '\n') + '\n Backup File: ' + backupDir + item.strip('\n') + '.rollback_' + now_time)
+        # print(basePath + item.strip('\n'), ' \n' + backupDir + item.strip('\n') + '.rollback')
 
-    # Execute command on SSH terminal  RENAME & BACKUP CURRENT SITE
-    # using exec_command
-    command = 'powershell.exe Compress-Archive -FORCE -Path ' + rootPath + basePath + '* -destinationPath ' + rootPath + backupDir + '/Site_Rollback_' + now_time + '.zip'
-    print(command)
-    execRemoteCommand(command)
+        try:
+            sftp_client.stat("/" + basePath + item.strip('\n'))
+        except Exception as err:
+            print(basePath + item.strip('\n') + " Not Found! \n{}".format(err))
+        finally:
+            try:
+                command = "powershell.exe Move-Item -Force -Path '" + basePath + item.strip(
+                    '\n') + "' -Destination '" + backupDir + item.strip('\n') + ".rollback_" + now_time + "'"
+                execRemoteCommand(command)
+            except Exception as err:
+                print("Unable to backup " + basePath + item.strip('\n') + ": {}".format(err))
+                sys.exit(1)
+        print('###############-END-###############\n')
+        sftp_client.close()
 
-    # Execute command on SSH terminal REMOVE CURRENT SITE
-    # using exec_command
-    command = 'rd /s/q C:\\Websites\\Site\\'
-    print(command)
-    execRemoteCommand(command)
-    time.sleep(2)
+        # Copy new file
+        sftp_client = ssh.open_sftp()
+        print('\n###############-COPY FILE-###############')
+        sftp_client.chdir(basePath)
+        print('Working Directory: ' + sftp_client.getcwd())
+        print('Copying file: ' + item.strip('\n') + '\n HOST: ' + hostname + '\n PATH: ' + basePath + item.strip('\n'))
+        sftp_client.put(item.strip('\n'), "/" + basePath + item.strip('\n'))
 
-    # Execute command on SSH terminal EXTRACT ARCHIVE NEW SITE
-    # using exec_command
-    command = 'powershell.exe Expand-Archive -FORCE -Path ' + rootPath + 'Site.zip -destinationPath ' + rootPath + basePath
-    print(command)
-    execRemoteCommand(command)
+        print('###############-END-###############\n')
+        sftp_client.close()
 
 
 get_arguments()
 establish_connection(hostname, username, password)
 
-rootPath = 'C:/Websites/'
-basePath = 'Site/'
-backupDir = 'Site_Backup/'
+basePath = 'D:/Websites/' + site + '/'
+backupDir = 'D:/Websites/Backup/' + site + '/'
 
-automateDeployment()
+os.system('powershell.exe Expand-Archive -Force -Path changes.zip -DestinationPath ./changes')
+time.sleep(2)
+os.chdir('changes')
+print('Local Working directory: ' + os.getcwd())
 
-# Clean Up
-command = 'del /q C:\\Websites\\Site.zip'
-print(command)
-execRemoteCommand(command)
+print('reading file...')
+with open("output.txt") as f:
+    lines = f.readlines()
+    print(type(lines))
+    print(lines)
+
+automateDeployment(lines)
+applyWebConfig(env)
 ssh.close()
