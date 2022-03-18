@@ -54,12 +54,8 @@ def get_compose_cmd():
 
 get_env_username_password()
 
-applications = {"fas-rbgli" + env + "01": ["IFHTransactionConnector", "IFHReconConnector", "IFHAccrualConnector"],
-                    "fas-rbgli" + env + "02": ["gliAccrualDecoupling", "gliTransactionDecoupling", "gliCacheLoad",
-                                               "ifhEventSanitizer", "ifhGLEventDecoupling", "GLIFicmFile"],
-                    "fas-rbgli" + env + "03": ["gliRecon", "gliCacheLoad"],
-                    "fas-rbgli" + env + "04": ["gmStreaming", "ignite"],
-                    "fas-rbgli" + env + "05": ["ifhFileIntegration", "ignite", "gliMaintenanceApi"]}
+applications = {}
+
 get_compose_cmd()
 
 docker_ps = 'docker ps --no-trunc --format "table {{.Names}}\\t{{.Status}}"'
