@@ -1,0 +1,1 @@
+{"fas-rbglint01": ["IFHAccrualConnector", "Demo-01"], "fas-rbglint02": ["gliAccrualDecoupling", "gliTransactionDecoupling", "gliCacheLoad-02", "Demo-02"], "fas-rbglint03": ["gliRecon", "Demo-03"], "fas-rbglint04": ["gmStreaming", "ignite-04", "Demo-04"], "fas-rbglint05": ["IFHTransactionConnectorPOC", "gliCacheLoadPoc", "ifhFileIntegration", "ignite-05", "Demo-05"]}
