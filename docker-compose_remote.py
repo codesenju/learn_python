@@ -72,7 +72,7 @@ def docker_compose(list_, docker_compose_cmd):
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh_client.connect(hostname=x, username=username, password=password)
             for c in y:
-                cmd_ = "cd /opt/SVC_KafkaIGX_poc_dev/docker_run/" + c + "/ && docker-compose " + docker_compose_cmd
+                cmd_ = "cd /tmp/docker_run/" + c + "/ && docker-compose " + docker_compose_cmd
                 print(cmd_)
                 execRemoteCommand(cmd_, ssh_client)
                 sftp_client = ssh_client.open_sftp()
