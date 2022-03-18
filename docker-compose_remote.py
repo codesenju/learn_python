@@ -76,7 +76,7 @@ def docker_compose(list_, docker_compose_cmd):
                 print(cmd_)
                 execRemoteCommand(cmd_, ssh_client)
                 sftp_client = ssh_client.open_sftp()
-                # dir_ = "/opt/SVC_KafkaIGX_poc_dev/docker_run/" + c + "/"
+                # dir_ = "/tmp/docker_run/" + c + "/"
                 # print(dir_)
                 # sftp_client.chdir(dir_)
                 # print(sftp_client.listdir())
